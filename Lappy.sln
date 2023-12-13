@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34407.89
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LappyBag", "LappyBag\LappyBag.csproj", "{5B2D092D-35AC-43C8-961D-AB89917ED75D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5B2D092D-35AC-43C8-961D-AB89917ED75D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B2D092D-35AC-43C8-961D-AB89917ED75D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B2D092D-35AC-43C8-961D-AB89917ED75D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B2D092D-35AC-43C8-961D-AB89917ED75D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E8B3F1B2-2215-4DA0-8453-927142CFACA1}
+	EndGlobalSection
+EndGlobal
