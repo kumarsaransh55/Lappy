@@ -1,3 +1,6 @@
+using LappyBag.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace LappyBag
 {
     public class Program
@@ -8,6 +11,8 @@ namespace LappyBag
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddDbContext<ApplicationDbContext>(options=>
+            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             var app = builder.Build();
 
