@@ -1,0 +1,139 @@
+﻿@model ProductVM
+
+<form method="post" enctype="multipart/form-data">
+    @* <input asp-for="Product.Id" hidden /> *@
+    <div class="border border-2 p-3 mt-4">
+        <div class="row pb-0">
+            <h2 class="text-primary">
+                @(Model.Product.Id != 0 ? "Update" : "Create") Product
+            </h2>
+            <hr />
+        </div>
+        <input asp-for="Product.Id" hidden />
+        <input asp-for="Product.ImageUrl" hidden />
+        @*   <div asp asp-validation-summary="All"></div> For Using this we change the controller class's AddModelError to "" and a message attributes are all, ModelOnly and None*@
+        <div class="row">
+            <div class="col-10">
+                <div class="mb-3">
+                    <label asp-for="Product.Brand"></label>
+                    <input asp-for="Product.Brand" class="form-control" />
+                    <span asp-validation-for="Product.Brand" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Product.ModelName"></label>
+                    <input asp-for="Product.ModelName" class="form-control" />
+                    <span asp-validation-for="Product.ModelName" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Product.ScreenSize"></label>
+                    <input asp-for="Product.ScreenSize" class="form-control" />
+                    <span asp-validation-for="Product.ScreenSize" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Product.Colour"></label>
+                    <input asp-for="Product.Colour" class="form-control" />
+                    <span asp-validation-for="Product.Colour" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Product.HardDiskSize"></label>
+                    <input asp-for="Product.HardDiskSize" class="form-control" />
+                    <span asp-validation-for="Product.HardDiskSize" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Product.CpuModel"></label>
+                    <input asp-for="Product.CpuModel" class="form-control" />
+                    <span asp-validation-for="Product.CpuModel" class="text-danger"></span>
+                    <div class="mb-3">
+                        <label asp-for="Product.RamMemory"></label>
+                        <input asp-for="Product.RamMemory" class="form-control" />
+                        <span asp-validation-for="Product.RamMemory" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Product.OS"></label>
+                        <input asp-for="Product.OS" class="form-control" />
+                        <span asp-validation-for="Product.OS" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Product.SpecialFeatures"></label>
+                        <input asp-for="Product.SpecialFeatures" class="form-control" />
+                        <span asp-validation-for="Product.SpecialFeatures" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Product.GraphicsCard"></label>
+                        <input asp-for="Product.GraphicsCard" class="form-control" />
+                        <span asp-validation-for="Product.GraphicsCard" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Product.Description"></label>
+                        <textarea asp-for="Product.Description" class="form-control"></textarea>
+                        <span asp-validation-for="Product.Description" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Product.ListPrice"></label>
+                        <input asp-for="Product.ListPrice" class="form-control" />
+                        <span asp-validation-for="Product.ListPrice" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Product.ListPrice10"></label>
+                        <input asp-for="Product.ListPrice10" class="form-control" />
+                        <span asp-validation-for="Product.ListPrice10" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Product.ListPrice25"></label>
+                        <input asp-for="Product.ListPrice25" class="form-control" />
+                        <span asp-validation-for="Product.ListPrice25" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Product.ListPrice100"></label>
+                        <input asp-for="Product.ListPrice100" class="form-control" />
+                        <span asp-validation-for="Product.ListPrice100" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Product.Category"></label>
+                        <select asp-for="Product.CategoryId" asp-items="@Model.CategoryListVb" class="form-select">
+                            <option disabled selected> --Select Category-- </option>
+                        </select>
+                        <span asp-validation-for="Product.CategoryId" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        Upload Image
+                        <input type="file" name="file" class="form-control" />
+                    </div>
+                    <div asp asp-validation-summary="All"></div>
+                </div>
+            
+        </div>
+            <div class="col-2">
+                <img src="@Model.Product.ImageUrl" width="100%" style="border:1px" />
+            </div>
+        
+        <div class="row">
+            <div class="col-6">
+                    <button type="submit" class="btn btn-primary form-control">@(Model.Product.Id != 0 ? "Update" : "Create") </button>
+            </div>
+            <div class="col-6">
+                <a asp-controller="Product" asp-action="Index" class="btn btn-secondary border border-2 form-control">Back To List</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        tinymce.init({
+            selector: 'textarea',
+            plugins: 'mentions anchor autolink charmap codesample lists searchreplace table visualblocks wordcount checklist casechange export pageembed permanentpen advtemplate advtable advcode tableofcontents mergetags powerpaste tinymcespellchecker autocorrect a11ychecker typography inlinecss',
+            toolbar: 'undo redo | blocks fontfamily fontsize | align lineheight | checklist numlist bullist indent outdent | removeformat',
+            tinycomments_mode: 'embedded',
+            tinycomments_author: 'Author name',
+            mergetags_list: [
+                { value: 'First.Name', title: 'First Name' },
+                { value: 'Email', title: 'Email' },
+            ],
+            ai_request: (request, respondWith) => respondWith.string(() => Promise.reject("See docs to implement AI Assistant")),
+        });
+    </script>
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}

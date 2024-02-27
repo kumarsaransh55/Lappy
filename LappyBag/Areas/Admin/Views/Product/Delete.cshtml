@@ -1,0 +1,101 @@
+﻿@model Product
+
+<form method="post">
+    <div class="border border-2 p-3 mt-4">
+        <div class="row pb-0">
+            <h2 class="text-primary">
+               Delete Product
+            </h2>
+            <hr />
+        </div>
+        @*   <div asp asp-validation-summary="All"></div> For Using this we change the controller class's AddModelError to "" and a message attributes are all, ModelOnly and None*@
+        <div class="mb-3">
+            <label asp-for="Brand"></label>
+            <input asp-for="Brand" class="form-control" disabled/>
+            <span asp-validation-for="Brand" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="ModelName"></label>
+            <input asp-for="ModelName" class="form-control" disabled/>
+            <span asp-validation-for="ModelName" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="ScreenSize"></label>
+            <input asp-for="ScreenSize" class="form-control" disabled/>
+            <span asp-validation-for="ScreenSize" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Colour"></label>
+            <input asp-for="Colour" class="form-control" disabled/>
+            <span asp-validation-for="Colour" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="HardDiskSize"></label>
+            <input asp-for="HardDiskSize" class="form-control" disabled/>
+            <span asp-validation-for="HardDiskSize" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="CpuModel"></label>
+            <input asp-for="CpuModel" class="form-control" disabled/>
+            <span asp-validation-for="CpuModel" class="text-danger"></span>
+            <div class="mb-3">
+                <label asp-for="RamMemory"></label>
+                <input asp-for="RamMemory" class="form-control" disabled/>
+                <span asp-validation-for="RamMemory" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="OS"></label>
+                <input asp-for="OS" class="form-control" disabled/>
+                <span asp-validation-for="OS" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="SpecialFeatures"></label>
+                <input asp-for="SpecialFeatures" class="form-control"disabled />
+                <span asp-validation-for="SpecialFeatures" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="GraphicsCard"></label>
+                <input asp-for="GraphicsCard" class="form-control" disabled/>
+                <span asp-validation-for="GraphicsCard" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description"></label>
+                <textarea asp-for="Description" class="form-control"disabled></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ListPrice"></label>
+                <input asp-for="ListPrice" class="form-control" disabled/>
+                <span asp-validation-for="ListPrice" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ListPrice10"></label>
+                <input asp-for="ListPrice10" class="form-control" disabled/>
+                <span asp-validation-for="ListPrice10" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ListPrice25"></label>
+                <input asp-for="ListPrice25" class="form-control" disabled/>
+                <span asp-validation-for="ListPrice25" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ListPrice100"></label>
+                <input asp-for="ListPrice100" class="form-control" disabled/>
+                <span asp-validation-for="ListPrice100" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="col-6">
+                    <button type="submit" class="btn btn-primary form-control bg-danger">Delete</button>
+                </div>
+                <div class="col-6">
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-secondary border border-2 form-control">Back To List</a>
+                </div>
+            </div>
+        </div>
+</form>
+
+@section Scripts {
+    @{
+        <partial name="_ValidationScriptsPartial" />
+    }
+}
