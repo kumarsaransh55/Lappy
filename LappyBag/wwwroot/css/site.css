@@ -20,3 +20,12 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.product-card {
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+
+    .product-card:hover {
+        transform: translateY(-5px) scale(1.01);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    }

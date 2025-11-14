@@ -83,6 +83,11 @@
                 <input asp-for="ListPrice100" class="form-control" disabled/>
                 <span asp-validation-for="ListPrice100" class="text-danger"></span>
             </div>
+            <div class="mb-3">
+                <label asp-for="Category.Name"></label>
+                <input type="text" value="@Model.Category?.Name" class="form-control" disabled></input>
+
+            </div>
             <div class="row">
                 <div class="col-6">
                     <button type="submit" class="btn btn-primary form-control bg-danger">Delete</button>

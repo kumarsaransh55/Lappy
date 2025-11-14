@@ -11,28 +11,28 @@ namespace LappyBag.Areas.Admin.Controllers
     [Area("Admin")]
     public class ProductController : Controller
     {
-        private readonly IUnitOfWork _db;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public ProductController(IUnitOfWork db, IWebHostEnvironment webHostEnvironment)
+        public ProductController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment)
         {
-            _db = db;
+            _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
         }
         public IActionResult Index()
         {
-            IEnumerable<Product> obj= _db.Product.GetAll(includeProperties:"Category").ToList();
+            IEnumerable<Product> obj= _unitOfWork.Product.GetAll(includeProperties:"Category").ToList();
             return View(obj);
         }
         public IActionResult Upsert(int? id)
          {
-            IEnumerable<SelectListItem> categoryList = _db.Category.GetAll().Select(u => new SelectListItem { Text = u.Name, Value = u.Id.ToString() });
+            IEnumerable<SelectListItem> categoryList = _unitOfWork.Category.GetAll().Select(u => new SelectListItem { Text = u.Name, Value = u.Id.ToString() });
             //ViewBag.categoryListVb=categoryList;
             // We can also transfer data from controller to view which is not present in the model itself by using viewdata(Little hard) Like by
             // ViewData["categoryList"] and using in view by casting it as asp-items="@(ViewData[categoryList] as IEnumerable<SelectListItem>)"
             Product product = new Product();
             if (id != null && id!=0)
             {
-                product= _db.Product.Get(u=>u.Id==id);
+                product= _unitOfWork.Product.Get(u=>u.Id==id);
             }
             ProductVM productvM = new ProductVM()
             {
@@ -72,55 +72,45 @@ namespace LappyBag.Areas.Admin.Controllers
                 }
                 if (productVm.Product.Id == 0)
                 {
-                    _db.Product.Add(productVm.Product);
+                    _unitOfWork.Product.Add(productVm.Product);
                     TempData["successmsg"] = "Product Created Successfully";
                 }
                 else
                 {
-                    _db.Product.Update(productVm.Product);
+                    _unitOfWork.Product.Update(productVm.Product);
                     TempData["successmsg"] = "Product Updated Successfully";
                 }
-                _db.Save();
+                _unitOfWork.Save();
                 return RedirectToAction("Index");
             }
             last:
-            productVm.CategoryListVb= _db.Category.GetAll().Select(u => new SelectListItem { Text = u.Name, Value = u.Id.ToString() });
+            productVm.CategoryListVb= _unitOfWork.Category.GetAll().Select(u => new SelectListItem { Text = u.Name, Value = u.Id.ToString() });
             return View(productVm);
         }
 
+        [HttpDelete]
         public IActionResult Delete(int? id)
         {
-            if (id == null || id == 0)
+            Product objtoBeDeleted = _unitOfWork.Product.Get(u => u.Id == id);
+            if (objtoBeDeleted != null)
             {
-                return NotFound();
+                string imagePath = Path.Combine(_webHostEnvironment.WebRootPath,objtoBeDeleted.ImageUrl.TrimStart('\\'));
+                if (System.IO.File.Exists(imagePath))
+                {
+                    System.IO.File.Delete(imagePath);
+                }
+                _unitOfWork.Product.Remove(objtoBeDeleted);
+                _unitOfWork.Save();
+                return Json(new { success = true, message = "Delete Successful" });
             }
-            Product obj = _db.Product.Get(u => u.Id == id);
-            if (obj == null)
-            {
-                return NotFound();
-            }
-            return View(obj);
-        }
-
-        [HttpPost]
-        public IActionResult Delete(Product? obj)
-        {
-            if (obj != null)
-            {
-                    _db.Product.Remove(obj);
-                    _db.Save();
-                    TempData["successmsg"] = "Product Deleted Successfully";
-                    return RedirectToAction("Index");
-             
-            }
-             return View();
+            return Json(new { success = false, message = "Error while Deleting" });
         }
 
         #region API CALLS
         [HttpGet]
         public IActionResult GetAll()
         {
-            List<Product> obj = _db.Product.GetAll(includeProperties: "Category").ToList();
+            List<Product> obj = _unitOfWork.Product.GetAll(includeProperties: "Category").ToList();
             return Json(new { data = obj });
         }
         #endregion
