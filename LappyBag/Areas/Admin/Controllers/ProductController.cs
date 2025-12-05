@@ -1,14 +1,17 @@
-﻿using Lappy.DataAccess.Repository;
+﻿using System.Collections.Generic;
+using Lappy.DataAccess.Repository;
 using Lappy.DataAccess.Repository.IRepository;
 using Lappy.Models;
 using Lappy.Models.ViewModels;
+using Lappy.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Collections.Generic;
 
 namespace LappyBag.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
     public class ProductController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
