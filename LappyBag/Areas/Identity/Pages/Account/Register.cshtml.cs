@@ -31,7 +31,7 @@ namespace LappyBag.Areas.Identity.Pages.Account
     public class RegisterModel : PageModel
     {
         private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<IdentityRole> _RoleManager;
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IUserStore<IdentityUser> _userStore;
         private readonly IUserEmailStore<IdentityUser> _emailStore;
@@ -41,7 +41,7 @@ namespace LappyBag.Areas.Identity.Pages.Account
 
         public RegisterModel(
             UserManager<IdentityUser> userManager,
-            RoleManager<IdentityRole> roleManager,
+            RoleManager<IdentityRole> RoleManager,
             IUserStore<IdentityUser> userStore,
             SignInManager<IdentityUser> signInManager,
             ILogger<RegisterModel> logger,
@@ -49,7 +49,7 @@ namespace LappyBag.Areas.Identity.Pages.Account
             IUnitOfWork unitOfWork)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
+            _RoleManager = RoleManager;
             _userStore = userStore;
             _emailStore = GetEmailStore();
             _signInManager = signInManager;
@@ -111,7 +111,7 @@ namespace LappyBag.Areas.Identity.Pages.Account
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
             
-            public string? role {get; set;}
+            public string? Role {get; set;}
 
             [ValidateNever]
             [Display(Name = "Select a Role")]
@@ -135,15 +135,15 @@ namespace LappyBag.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
-            if (!_roleManager.RoleExistsAsync(SD.Role_Customer).GetAwaiter().GetResult())
+            if (!_RoleManager.RoleExistsAsync(SD.Role_Customer).GetAwaiter().GetResult())
             {
-                await _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer));
-                await _roleManager.CreateAsync(new IdentityRole(SD.Role_Company));
-                await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
-                await _roleManager.CreateAsync(new IdentityRole(SD.Role_Employee));
+                await _RoleManager.CreateAsync(new IdentityRole(SD.Role_Customer));
+                await _RoleManager.CreateAsync(new IdentityRole(SD.Role_Company));
+                await _RoleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
+                await _RoleManager.CreateAsync(new IdentityRole(SD.Role_Employee));
             }
             Input = new InputModel();
-            Input.RoleList = _roleManager.Roles.Select(x => x.Name).Select(i=> new SelectListItem
+            Input.RoleList = _RoleManager.Roles.Select(x => x.Name).Select(i=> new SelectListItem
             {
                 Text = i,
                 Value = i
@@ -173,6 +173,7 @@ namespace LappyBag.Areas.Identity.Pages.Account
                 user.City = Input.City;
                 user.State = Input.State;
                 user.PinCode = Input.PinCode;
+                if(Input.Role == SD.Role_Company)
                 user.CompanyId = Input.CompanyId;
 
                 var result = await _userManager.CreateAsync(user, Input.Password);
@@ -181,9 +182,9 @@ namespace LappyBag.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User created a new account with password.");
 
-                    if (!string.IsNullOrEmpty(Input.role))
+                    if (!string.IsNullOrEmpty(Input.Role))
                     {
-                        await _userManager.AddToRoleAsync(user, Input.role);
+                        await _userManager.AddToRoleAsync(user, Input.Role);
                     }
                     else
                     {

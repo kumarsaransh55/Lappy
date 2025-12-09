@@ -57,7 +57,7 @@ namespace Lappy.Models
         public double ListPrice25 { get; set; }
         [Required]
         [Range(1, 1000000000)]
-        [Display(Name = "Price for >100 Quantity")]
+        [Display(Name = "Price for >50 Quantity")]
         public double ListPrice100 { get; set; }
         public int CategoryId { get; set; }
         [ForeignKey("CategoryId")]

@@ -1,20 +1,21 @@
-﻿@model Product
+﻿@model ShoppingCart
 
-<a asp-action="Index" class="btn btn-outline-primary text-uppercase p-2 mb-3">Back to Homepage</a>
+<a asp-action="Index" class="btn btn-outline-primary text-uppercase p-2 mb-3"><i class="bi bi-arrow-left"></i> &nbsp;Back to Homepage</a>
 
 <div class="row g-4 align-items-start">
     <!-- Image -->
     <div class="col-md-5 text-center">
-        <img src="@Model.ImageUrl"
-             alt="@Model.ModelName"
+        <img src="@Model.Product.ImageUrl"
+             alt="@Model.Product.ModelName"
              class="img-fluid rounded shadow-sm"
              style="max-height:550px; object-fit:contain;" />
 
         <div class="d-flex justify-content-center mt-3">
-            <form action="/" method="post" class="text-center" style="max-width: 300px; width: 100%;">
+            <form method="post" class="text-center" style="max-width: 300px; width: 100%;">
+                <input hidden asp-for="ProductId" />
                 <div class="input-group mb-3 border border-secondary shadow-sm">
                     <span class="input-group-text fw-semibold bg-white">Count</span>
-                    <input type="number" class="form-control text-center bg-gradient bg-primary-subtle text-primary" name="quantity" value="1" />
+                    <input asp-for="Count" type="number" class="form-control text-center bg-gradient bg-primary-subtle text-primary" />
                 </div>
                 <button type="submit" class="btn btn-primary w-75" name="addtoCart">Add to Cart</button>
             </form>
@@ -26,25 +27,25 @@
         <div class="card  shadow-sm border-0">
             <div class="card-body">
                 <!-- Title -->
-                <h3 class="fw-bold mb-3">@Model.Brand @Model.ModelName</h3>
+                <h3 class="fw-bold mb-3">@Model.Product.Brand @Model.Product.ModelName</h3>
 
                 <!-- Prices -->
                 <div class="mb-4">
-                    <h4 class="fw-semibold mb-1 text-dark">₹ @Model.ListPrice</h4>
+                    <h4 class="fw-semibold mb-1 text-dark">₹ @Model.Product.ListPrice</h4>
                     <small class="text-secondary d-block mb-2">Price for 1 unit</small>
 
                     <div class="row text-dark">
                         <div class="col-4">
                             <div>Price for 10–25 units</div>
-                            <strong class="text-primary">₹ @Model.ListPrice10</strong>
+                            <strong class="text-primary">₹ @Model.Product.ListPrice10</strong>
                         </div>
                         <div class="col-4">
                             <div>Price for 25–50 units</div>
-                            <strong class="text-primary">₹ @Model.ListPrice25</strong>
+                            <strong class="text-primary">₹ @Model.Product.ListPrice25</strong>
                         </div>
                         <div class="col-4">
                             <div>Price for &gt;100 units</div>
-                            <strong class="text-primary">₹ @Model.ListPrice100</strong>
+                            <strong class="text-primary">₹ @Model.Product.ListPrice100</strong>
                         </div>
                     </div>
                 </div>
@@ -54,21 +55,21 @@
                 <div class="row">
                     <div class="col-sm-6">
                         <ul class="list-unstyled mb-0">
-                            <li><strong>Brand:</strong> @Model.Brand</li>
-                            <li class="mt-2"><strong>Model Name:</strong> @Model.ModelName</li>
-                            <li class="mt-2"><strong>Screen Size:</strong> @Model.ScreenSize</li>
-                            <li class="mt-2"><strong>Colour:</strong> @Model.Colour</li>
-                            <li class="mt-2"><strong>Hard Disk Size:</strong> @Model.HardDiskSize</li>
+                            <li><strong>Brand:</strong> @Model.Product.Brand</li>
+                            <li class="mt-2"><strong>Model Name:</strong> @Model.Product.ModelName</li>
+                            <li class="mt-2"><strong>Screen Size:</strong> @Model.Product.ScreenSize</li>
+                            <li class="mt-2"><strong>Colour:</strong> @Model.Product.Colour</li>
+                            <li class="mt-2"><strong>Hard Disk Size:</strong> @Model.Product.HardDiskSize</li>
                         </ul>
                     </div>
 
                     <div class="col-sm-6">
                         <ul class="list-unstyled mb-0">
-                            <li><strong>CPU Model:</strong> @Model.CpuModel</li>
-                            <li class="mt-2"><strong>RAM Memory Size:</strong> @Model.RamMemory</li>
-                            <li class="mt-2"><strong>Operating System:</strong> @Model.OS</li>
-                            <li class="mt-2"><strong>Graphics Card:</strong> @Model.GraphicsCard</li>
-                            <li class="mt-2"><strong>Special Features:</strong> @Model.SpecialFeatures</li>
+                            <li><strong>CPU Model:</strong> @Model.Product.CpuModel</li>
+                            <li class="mt-2"><strong>RAM Memory Size:</strong> @Model.Product.RamMemory</li>
+                            <li class="mt-2"><strong>Operating System:</strong> @Model.Product.OS</li>
+                            <li class="mt-2"><strong>Graphics Card:</strong> @Model.Product.GraphicsCard</li>
+                            <li class="mt-2"><strong>Special Features:</strong> @Model.Product.SpecialFeatures</li>
                         </ul>
                     </div>
                 </div>
@@ -77,7 +78,7 @@
                 <div class="mt-4">
                     <h5 class="fw-semibold mb-2">Description</h5>
                     <div>
-                        @Html.Raw(Model.Description)
+                        @Html.Raw(Model.Product.Description)
                     </div>
                 </div>
             </div>

@@ -1,0 +1,129 @@
+﻿@using System.Text.RegularExpressions
+@model ShoppingCartVM
+
+<form method="post">
+    <br />
+    <div class="container">
+        <div class="card shadow border-1">
+            <!-- HEADER: Title and Continue Shopping -->
+            <div class="card-header bg-secondary bg-gradient ml-0 py-4">
+                <div class="row px-2 align-items-center">
+                    <div class="col-6 col-md-4">
+                        <a asp-area="Customer" asp-controller="Home" asp-action="Index" class="btn btn-light btn-sm text-uppercase"><i class="bi bi-arrow-left"></i> &nbsp;Continue Shopping</a>
+                    </div>
+                    <div class="col-4 col-md-4 text-end text-center">
+                        <h5 class="pt-2">
+                            Shopping Cart
+                        </h5>
+                    </div>
+                    <div class="col-md-4 d-none d-md-block"></div>
+                </div>
+            </div>
+
+            <div class="card-body my-1">
+                <div class="row mb-1 pb-3 border-bottom d-none d-lg-flex">
+                    <div class="col-lg-2 text-center">Product</div>
+                    <div class="col-lg-5">Details</div>
+                    <div class="col-lg-2 text-center">Price</div>
+                    <div class="col-lg-2 text-center">Quantity</div>
+                    <div class="col-lg-1"></div>
+                </div>
+
+                <!-- LOOP THROUGH CART ITEMS -->
+                @foreach (var item in Model.ShoppingCartList)
+                {
+                    // 1. CALCULATE PRICE BASED ON QUANTITY
+                    // We check the count and pick the correct price from your Product model
+                    double price = item.Product.ListPrice;
+                    if (item.Count >= 10 && item.Count < 25) { price = item.Product.ListPrice10; }
+                    else if (item.Count >= 25 && item.Count < 100) { price = item.Product.ListPrice25; }
+                    else if (item.Count >= 100) { price = item.Product.ListPrice100; }
+
+                    <div class="row border-bottom pb-3 mb-3 align-items-center">
+                        <!-- 1. IMAGE -->
+                        <div class="col-12 col-lg-2 text-center py-2">
+                            @if (item.Product.ImageUrl != null)
+                            {
+                                <img src="@item.Product.ImageUrl" class="rounded w-100" />
+                            }
+                            else
+                            {
+                                <img src="https://placehold.co/500x600/png" class="rounded w-100" />
+                            }
+                        </div>
+
+                        <!-- 2. PRODUCT DETAILS -->
+                        <div class="col-12 col-lg-5">
+                            <h5 class="text-uppercase"><strong>@item.Product.Brand @item.Product.ModelName</strong></h5>
+                            <p><small class="">CPU: @item.Product.CpuModel</small></p>
+                            <p><small class="">RAM: @item.Product.RamMemory | HDD: @item.Product.HardDiskSize</small></p>
+                            <!-- Description truncated to keep it neat -->
+                            <p>
+                                @{
+                                    //Description Processing
+                                    string description = Regex.Replace(item.Product.Description,"<.*?>",string.Empty);
+                                    if(description.Length > 100)
+                                    {
+                                        description = description.Substring(0, 100) + "...";
+                                    }
+                                }
+                                <small>@description</small></p>
+                        </div>
+
+                        <!-- 3. PRICE DISPLAY -->
+                        <div class="col-12 col-lg-2 text-center">
+                            <p class="text-warning fw-bold">@price.ToString("c") </p>
+                            <span class="text-muted" style="font-size:12px;">x @item.Count</span>
+                        </div>
+
+                        <!-- 4. QUANTITY CONTROLS (+ / -) -->
+                        <div class="col-12 col-lg-2 text-center">
+                            <div class="btn-group" role="group">
+                                <!-- Minus Button -->
+                                <a asp-action="minus" asp-route-cartId="@item.Id" class="btn btn-dark p-2">
+                                    <i class="bi bi-dash-square"></i>
+                                </a>
+                                <!-- Current Count -->
+                                <span class="btn btn-outline-dark p-2" style="cursor:default; width:50px;">
+                                    @item.Count
+                                </span>
+                                <!-- Plus Button -->
+                                <a asp-action="plus" asp-route-cartId="@item.Id" class="btn btn-dark p-2">
+                                    <i class="bi bi-plus-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- 5. DELETE BUTTON -->
+                        <div class="col-12 col-lg-1 text-center text-lg-end mt-3 mt-lg-0">
+                            <a asp-action="remove" asp-route-cartId="@item.Id" class="btn btn-danger">
+                                <i class="bi bi-trash-fill"></i>
+                            </a>
+                        </div>
+                    </div>
+                }
+
+                <!-- FOOTER: TOTAL AND CHECKOUT -->
+                <div class="row">
+                    <div class="col-12 col-md-6 offset-md-6 col-lg-4 offset-lg-8 pr-4">
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between bg-light">
+                                <span class="text-info"> Total (INR)</span>
+                                <strong class="text-info">@Model.OrderTotal.ToString("c")</strong>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="card-footer bg-white border-0">
+                <div class="row">
+                    <div class="col-md-4 offset-md-8">
+                        <a asp-action="Summary" class="btn btn-success form-control">Summary</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
