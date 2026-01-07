@@ -1,0 +1,42 @@
+﻿@model int
+
+<div class="container row pt-4">
+    <div class="col-12 text-center">
+
+        <!-- 1. Success Icon -->
+        <h1 class="text-primary text-center">
+            <!-- Ensure you have Bootstrap Icons linked in _Layout.cshtml for this to work -->
+            <i class="bi bi-check-circle-fill" style="color: #28a745; font-size: 80px;"></i>
+        </h1>
+
+        <h2 class="text-primary text-center">Order Placed Successfully!</h2>
+
+        <br />
+
+        <!-- 2. Order Number Display -->
+        <div class="card shadow border-0 mb-4" style="max-width: 600px; margin: 0 auto;">
+            <div class="card-body">
+                <p class="card-text fs-4">
+                    Your Order Number is: <strong class="text-warning">#@Model</strong>
+                </p>
+                <p class="text-muted">
+                    We have sent a confirmation email to your registered email address.
+                    <br />
+                    Your package will be shipped within 2 days.
+                </p>
+            </div>
+        </div>
+
+        <!-- 4. Navigation Buttons -->
+        <div class="col-12 text-center">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-success bg-gradient px-5 py-2">
+                Return to Home
+            </a>
+            <br /><br />
+            <!-- Optional: Link to see all orders if you have that page -->
+            <a asp-controller="Order" asp-action="Index" class="btn btn-outline-primary">
+                View My Orders
+            </a>
+        </div>
+    </div>
+</div>

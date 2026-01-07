@@ -1,6 +1,6 @@
 ﻿@model ShoppingCart
 
-<a asp-action="Index" class="btn btn-outline-primary text-uppercase p-2 mb-3"><i class="bi bi-arrow-left"></i> &nbsp;Back to Homepage</a>
+<a asp-action="Index" class="btn btn-light btn-sm text-uppercase p-2 mb-1"><i class="bi bi-arrow-left"></i> &nbsp;Back to Homepage</a>
 
 <div class="row g-4 align-items-start">
     <!-- Image -->
@@ -11,11 +11,27 @@
              style="max-height:550px; object-fit:contain;" />
 
         <div class="d-flex justify-content-center mt-3">
-            <form method="post" class="text-center" style="max-width: 300px; width: 100%;">
+            <form method="post" class="" style="max-width: 300px; width: 100%;" >
                 <input hidden asp-for="ProductId" />
-                <div class="input-group mb-3 border border-secondary shadow-sm">
-                    <span class="input-group-text fw-semibold bg-white">Count</span>
-                    <input asp-for="Count" type="number" class="form-control text-center bg-gradient bg-primary-subtle text-primary" />
+                
+                <div class="input-group justify-content-center mb-3 shadow-sm">
+                    <!-- MINUS BUTTON -->
+                    <button type="button" class="btn btn-primary" onclick="updateCount(-1)">
+                        <i class="bi bi-dash-lg"></i>
+                    </button>
+
+                    <!-- THE INPUT (Note the ID 'countInput') -->
+                    <input asp-for="Count"
+                           id="countInput"
+                           type="number"
+                           value="1" min="1" max="1000"
+                           class="form-control text-center btn-outline-primary"
+                           style="max-width: 80px;" />
+
+                    <!-- PLUS BUTTON -->
+                    <button type="button" class="btn btn-primary " onclick="updateCount(1)">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
                 </div>
                 <button type="submit" class="btn btn-primary w-75" name="addtoCart">Add to Cart</button>
             </form>
@@ -85,3 +101,36 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // 1. BUTTON LOGIC
+        function updateCount(change) {
+            let input = document.getElementById('countInput');
+            // Parse current value (default to 0 if empty)
+            let currentValue = parseInt(input.value) || 0;
+            let newValue = currentValue + change;
+
+            // Enforce Min/Max (Optional but good UX)
+            if (newValue < 1) newValue = 1;
+            if (newValue > 1000) newValue = 1000;
+
+            input.value = newValue;
+        }
+
+        // 2. SCROLL LOGIC
+        // We attach an event listener to the input
+        document.getElementById('countInput').addEventListener('wheel', function(e) {
+            // Prevent the page from scrolling down while we change the number
+            e.preventDefault();
+
+            if (e.deltaY < 0) {
+                // Scrolled UP -> Add 1
+                this.stepUp();
+            } else {
+                // Scrolled DOWN -> Subtract 1
+                this.stepDown();
+            }
+        });
+    </script>
+}

@@ -1,127 +1,221 @@
-﻿using Lappy.DataAccess.Repository;
-using Lappy.DataAccess.Repository.IRepository;
+﻿using Lappy.DataAccess.Repository.IRepository;
 using Lappy.Models;
+using Lappy.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Razorpay.Api;
+
 
 namespace LappyBag.Areas.Customer.Controllers
 {
     [Area("Customer")]
+    [Authorize]
     public class CartController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
-        public CartController(IUnitOfWork unitOfWork)
+        private readonly IConfiguration _configuration;
+        public CartController(IUnitOfWork unitOfWork, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
+            _configuration = configuration;
         }
         // GET: CartController
+        
         public ActionResult Index()
+        {
+            return View(getShoppingCartVM());
+        }
+
+        private ShoppingCartVM getShoppingCartVM()
         {
             var claimsIdentity = (System.Security.Claims.ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value;
             ShoppingCartVM shoppingCartVM = new ShoppingCartVM()
             {
                 ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(s => s.ApplicationUserId == userId, "Product"),
-                OrderTotal = 0
+                OrderHeader = new OrderHeader()
             };
-            foreach(var item in shoppingCartVM.ShoppingCartList)
+            foreach (var item in shoppingCartVM.ShoppingCartList)
             {
-                double perProdPrice = getPriceAsPerQuantity(item);
-                shoppingCartVM.OrderTotal += perProdPrice;
+                double perProdPrice = getPriceAsPerQuantity(item) * item.Count ;
+                shoppingCartVM.OrderHeader.OrderTotal += perProdPrice;
             }
-            return View(shoppingCartVM);
+            return shoppingCartVM;
         }
 
-        public double getPriceAsPerQuantity(ShoppingCart shoppingCart)
+        private double getPriceAsPerQuantity(ShoppingCart shoppingCart)
         {
-            double price = 0;
             int quantity = shoppingCart.Count;
             if (quantity<10)
             {
-                price = shoppingCart.Product.ListPrice * quantity;
+                return shoppingCart.Product.ListPrice;
             }
-            else if(quantity<26)
+            else if(quantity<25)
             {
-                price = shoppingCart.Product.ListPrice10 * quantity;
+                return shoppingCart.Product.ListPrice10;
             }
-            else if(quantity<51)
+            else if(quantity<100)
             {
-                price = shoppingCart.Product.ListPrice25 * quantity;
+                return shoppingCart.Product.ListPrice25;
             }
             else
             {
-                price = shoppingCart.Product.ListPrice100 * quantity;
+                return shoppingCart.Product.ListPrice100;
             }
-            return price;
         }
 
-        // GET: CartController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: CartController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: CartController/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
+        public ActionResult updateCart(int cartId, string actionType)
         {
-            try
+            var claimsIdentity = (System.Security.Claims.ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value;
+            
+            var cart = _unitOfWork.ShoppingCart.Get(u => u.Id == cartId);
+            
+            if (userId != cart.ApplicationUserId)
             {
-                return RedirectToAction(nameof(Index));
+                return Forbid();
             }
-            catch
+                if (actionType == "plus")
             {
-                return View();
+                cart.Count++;
+                _unitOfWork.ShoppingCart.Update(cart);
+                
+            }else if(actionType == "minus")
+            {
+                if(cart.Count>1)
+                {
+                    cart.Count--;
+                    _unitOfWork.ShoppingCart.Update(cart);
+                }
+                else
+                {
+                    _unitOfWork.ShoppingCart.Remove(cart);
+                }
             }
+            else
+            {
+                _unitOfWork.ShoppingCart.Remove(cart);
+            }
+            _unitOfWork.Save();
+            return PartialView("_cartPartialView", getShoppingCartVM());
         }
 
-        // GET: CartController/Edit/5
-        public ActionResult Edit(int id)
+        public ActionResult orderSummary()
         {
-            return View();
+            ShoppingCartVM cart = getShoppingCartVM();
+            var userDetails = _unitOfWork.ApplicationUser.Get(u => u.Id == cart.ShoppingCartList.FirstOrDefault().ApplicationUserId);
+            cart.OrderHeader.Name = userDetails.Name;
+            cart.OrderHeader.PhoneNumber = userDetails.PhoneNumber;
+            cart.OrderHeader.StreetAddress = userDetails.StreetAddress;
+            cart.OrderHeader.City = userDetails.City;
+            cart.OrderHeader.State = userDetails.State;
+            cart.OrderHeader.PinCode = userDetails.PinCode;
+            return View(cart);
         }
 
-        // POST: CartController/Edit/5
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
+        public ActionResult orderSummary(ShoppingCartVM cart)
         {
-            try
+            var claimsIdentity = (System.Security.Claims.ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value;
+            var userDetails = _unitOfWork.ApplicationUser.Get(u => u.Id == userId);
+            cart.OrderHeader.ApplicationUserId = userId;
+            cart.OrderHeader.OrderDate = System.DateTime.Now;
+            cart.ShoppingCartList = _unitOfWork.ShoppingCart.GetAll(s => s.ApplicationUserId == userId, "Product");
+            foreach (var item in cart.ShoppingCartList)
             {
-                return RedirectToAction(nameof(Index));
+                double perProdPrice = getPriceAsPerQuantity(item);
+                cart.OrderHeader.OrderTotal += perProdPrice* item.Count;
             }
-            catch
+            if (userDetails.CompanyId.GetValueOrDefault() == 0)//Regular User
             {
-                return View();
+                cart.OrderHeader.PaymentStatus = SD.PaymentStatusPending;
+                cart.OrderHeader.OrderStatus = SD.StatusPending;
             }
+            else
+            {
+                cart.OrderHeader.PaymentStatus = SD.PaymentStatusDelayedPayment;
+                cart.OrderHeader.OrderStatus = SD.StatusApproved;
+            }
+            _unitOfWork.OrderHeader.Add(cart.OrderHeader);
+            _unitOfWork.Save();
+            foreach (var item in cart.ShoppingCartList)
+            {
+                OrderDetail orderDetail = new OrderDetail()
+                {
+                    ProductId = item.ProductId,
+                    OrderHeaderId = cart.OrderHeader.Id,
+                    Count = item.Count,
+                    Price = getPriceAsPerQuantity(item)
+                };
+                _unitOfWork.OrderDetail.Add(orderDetail);
+            }
+            _unitOfWork.Save();
+
+            if (userDetails.CompanyId.GetValueOrDefault() == 0)//Regular User
+            {
+                RazorpayClient client = new RazorpayClient(_configuration["Razorpay:KeyId"], _configuration["Razorpay:KeySecret"]);
+
+                Razorpay.Api.Order order = client.Order.Create(new Dictionary<string, object>
+                {
+                    {"amount", cart.OrderHeader.OrderTotal}, // amount in the smallest currency unit
+                    {"currency", "INR"},
+                    {"receipt", cart.OrderHeader.Id.ToString()},
+                    {"payment_capture", 1}
+                });
+                cart.OrderHeader.PaymentIntentId = order["id"].ToString();
+                cart.OrderHeader.PaymentDate = DateTime.Now;
+                _unitOfWork.OrderHeader.Update(cart.OrderHeader);
+                _unitOfWork.Save();
+
+                return RedirectToAction(nameof(Razorpay), new { id = cart.OrderHeader.Id });
+            }
+
+            return RedirectToAction(nameof(OrderConfirmation), new { id = cart.OrderHeader.Id });
+        }
+        
+        public ActionResult OrderConfirmation(int id)
+        {
+            return View(id);
         }
 
-        // GET: CartController/Delete/5
-        public ActionResult Delete(int id)
+        public ActionResult Razorpay(int id)
         {
-            return View();
+            var orderHeader = _unitOfWork.OrderHeader.Get(u => u.Id == id,includeProperties: "ApplicationUser");
+            ViewBag.KeyId = _configuration["Razorpay:KeyId"];
+            ViewBag.OrderId = orderHeader.PaymentIntentId;
+            ViewBag.Amount = orderHeader.OrderTotal*100;
+            ViewBag.Name = orderHeader.Name;
+            ViewBag.Phone = orderHeader.PhoneNumber;
+            ViewBag.Email = orderHeader.ApplicationUser.Email;
+            return View(orderHeader);
         }
 
-        // POST: CartController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
+        public ActionResult PaymentSuccess(int orderHeaderId, string payment_id, string order_id, string signature)
         {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+
+            RazorpayClient client = new RazorpayClient(_configuration["Razorpay:KeyId"], _configuration["Razorpay:KeySecret"]);
+
+            Dictionary<string, string> options = new Dictionary<string, string>();
+            options.Add("razorpay_order_id", order_id);
+            options.Add("razorpay_payment_id", payment_id);
+            options.Add("razorpay_signature", signature);
+
+            Utils.verifyPaymentSignature(options);
+
+            var orderHeader = _unitOfWork.OrderHeader.Get(u => u.Id == orderHeaderId, includeProperties: "ApplicationUser");
+            orderHeader.PaymentDate = DateTime.Now;
+            orderHeader.PaymentStatus = SD.PaymentStatusApproved;
+            orderHeader.OrderStatus = SD.StatusApproved;
+            orderHeader.TransactionId = payment_id;
+            _unitOfWork.OrderHeader.Update(orderHeader);
+            _unitOfWork.ShoppingCart.RemoveRange(_unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == orderHeader.ApplicationUserId));
+            _unitOfWork.Save();
+
+            return RedirectToAction(nameof(OrderConfirmation), new { id = orderHeaderId });
         }
+
     }
 }

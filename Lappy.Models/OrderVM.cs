@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Lappy.Models
 {
-    public class ShoppingCartVM
+    public class OrderVM
     {
-        public IEnumerable<ShoppingCart> ShoppingCartList { get; set; }
-        public OrderHeader OrderHeader { get; set; }
+        public OrderHeader orderHeader {  get; set; }
+        public IEnumerable<OrderDetail> orderDetails { get; set; }
     }
 }

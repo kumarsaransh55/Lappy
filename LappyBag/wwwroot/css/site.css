@@ -40,3 +40,10 @@ body {
     margin: auto 0.25rem;
     box-shadow: 0-2px;
 }
+
+/* Remove arrows/spinners from number input */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
