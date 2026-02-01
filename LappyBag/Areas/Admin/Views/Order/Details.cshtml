@@ -3,7 +3,8 @@
 
 <form method="post">
     <input asp-for="orderHeader.Id" hidden />
-
+    <input asp-for="orderHeader.ApplicationUserId" hidden />
+    <input asp-for="orderHeader.OrderTotal" hidden />
     <br />
     <div class="container">
         <div class="card">
@@ -191,7 +192,7 @@
                             </div>
 
                             <!-- UPDATE DETAILS BUTTON -->
-                            @if (User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee))
+                            @if ((User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee)) && Model.orderHeader.OrderStatus != SD.StatusCancelled)
                             {
                                 <input type="submit" asp-action="UpdateOrderDetail" class="btn btn-warning form-control my-1" value="Update Pickup Details" />
                             }
@@ -211,8 +212,8 @@
                                         <div class="row container">
                                             <div class="col-8">
                                                 <h6 class="my-0 text-primary">@detail.Product.ModelName</h6> <!-- Assuming Product has Title/Name -->
-                                                <small class="text-muted">Price : @detail.Price.ToString("c")</small><br />
-                                                <small class="text-muted">Quantity : @detail.Count</small>
+                                                <small >Price : @detail.Price.ToString("c")</small><br />
+                                                <small >Quantity : @detail.Count</small>
                                             </div>
                                             <div class="col-4 text-end">
                                                 <p class="text-success">@((detail.Count * detail.Price).ToString("c"))</p>
@@ -235,7 +236,7 @@
 
                             <!-- ACTION BUTTONS -->
                             <!-- 1. Pay Now (For Company/Delayed Payment) -->
-                            @if (Model.orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment && Model.orderHeader.OrderStatus == SD.StatusShipped && User.IsInRole(SD.Role_Employee))
+                            @if ((Model.orderHeader.PaymentStatus == SD.PaymentStatusDelayedPayment && Model.orderHeader.OrderStatus == SD.StatusShipped) || (Model.orderHeader.PaymentStatus == SD.PaymentStatusPending && User.IsInRole(SD.Role_Customer)))
                             {
                                 <input type="submit" asp-action="DetailsPayNow" class="btn btn-success form-control my-1" value="Pay Now" />
                             }

@@ -4,6 +4,7 @@ using Lappy.DataAccess.Data;
 using Lappy.DataAccess.Repository.IRepository;
 using Lappy.Models;
 using Microsoft.AspNetCore.Authorization;
+using Lappy.Utility;
 
 namespace LappyBag.Areas.Customer.Controllers
 {
@@ -52,12 +53,15 @@ namespace LappyBag.Areas.Customer.Controllers
             {
                 cartFromDb.Count += cart.Count;
                 _unitOfWork.ShoppingCart.Update(cartFromDb);
+                _unitOfWork.Save();
             }
             else
             {
                 _unitOfWork.ShoppingCart.Add(cart);
+                _unitOfWork.Save();
+                HttpContext.Session.SetInt32(SD.SessionCart, _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == userId).Count());
             }
-            _unitOfWork.Save();
+            
             TempData["Successmsg"] = "Product added to cart successfully";
             return RedirectToAction(nameof(Index));
         }

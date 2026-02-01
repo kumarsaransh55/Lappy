@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Identity;
 using Lappy.Models;
 using Lappy.Utility;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.CodeAnalysis.Options;
+using Lappy.DataAccess.DbInitializer;
 
 namespace LappyBag
 {
@@ -37,9 +39,23 @@ namespace LappyBag
             });
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IEmailSender,EmailSender>();
+            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(100);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+            
+            builder.Services.AddAuthentication().AddFacebook(option =>
+            {
+                option.AppId = "937066642088381";
+                option.AppSecret = "499fac9f40e0cef6ff96048a7f792a21";
+            });
 
             var app = builder.Build();
-
+            seedDatabase();
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
@@ -50,16 +66,26 @@ namespace LappyBag
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseSession();
             app.MapRazorPages();
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{area=Customer}/{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
+
+            void seedDatabase()
+            {
+                using(var scope = app.Services.CreateScope())
+                {
+                    var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+                    dbInitializer.InitializeAsync();
+                }
+            }
+
         }
     }
 }

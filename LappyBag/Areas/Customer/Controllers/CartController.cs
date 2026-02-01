@@ -92,11 +92,13 @@ namespace LappyBag.Areas.Customer.Controllers
                 else
                 {
                     _unitOfWork.ShoppingCart.Remove(cart);
+                    HttpContext.Session.SetInt32(SD.SessionCart, (int)HttpContext.Session.GetInt32(SD.SessionCart) - 1);
                 }
             }
             else
             {
                 _unitOfWork.ShoppingCart.Remove(cart);
+                HttpContext.Session.SetInt32(SD.SessionCart, (int)HttpContext.Session.GetInt32(SD.SessionCart) - 1);
             }
             _unitOfWork.Save();
             return PartialView("_cartPartialView", getShoppingCartVM());
@@ -172,12 +174,14 @@ namespace LappyBag.Areas.Customer.Controllers
 
                 return RedirectToAction(nameof(Razorpay), new { id = cart.OrderHeader.Id });
             }
-
+            _unitOfWork.ShoppingCart.RemoveRange(_unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == userId));
+            _unitOfWork.Save();
             return RedirectToAction(nameof(OrderConfirmation), new { id = cart.OrderHeader.Id });
         }
         
         public ActionResult OrderConfirmation(int id)
         {
+            HttpContext.Session.SetInt32(SD.SessionCart, 0);
             return View(id);
         }
 
@@ -207,8 +211,11 @@ namespace LappyBag.Areas.Customer.Controllers
 
             var orderHeader = _unitOfWork.OrderHeader.Get(u => u.Id == orderHeaderId, includeProperties: "ApplicationUser");
             orderHeader.PaymentDate = DateTime.Now;
+            if (orderHeader.PaymentStatus != SD.PaymentStatusDelayedPayment)
+            {
+                orderHeader.OrderStatus = SD.StatusApproved;
+            }
             orderHeader.PaymentStatus = SD.PaymentStatusApproved;
-            orderHeader.OrderStatus = SD.StatusApproved;
             orderHeader.TransactionId = payment_id;
             _unitOfWork.OrderHeader.Update(orderHeader);
             _unitOfWork.ShoppingCart.RemoveRange(_unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == orderHeader.ApplicationUserId));
@@ -217,5 +224,9 @@ namespace LappyBag.Areas.Customer.Controllers
             return RedirectToAction(nameof(OrderConfirmation), new { id = orderHeaderId });
         }
 
+        public IActionResult ReloadCartIcon()
+        {
+            return ViewComponent("ShoppingCart");
+        }
     }
 }

@@ -135,13 +135,6 @@ namespace LappyBag.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
-            if (!_RoleManager.RoleExistsAsync(SD.Role_Customer).GetAwaiter().GetResult())
-            {
-                await _RoleManager.CreateAsync(new IdentityRole(SD.Role_Customer));
-                await _RoleManager.CreateAsync(new IdentityRole(SD.Role_Company));
-                await _RoleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
-                await _RoleManager.CreateAsync(new IdentityRole(SD.Role_Employee));
-            }
             Input = new InputModel();
             Input.RoleList = _RoleManager.Roles.Select(x => x.Name).Select(i=> new SelectListItem
             {
@@ -160,66 +153,100 @@ namespace LappyBag.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
-            ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            if (ModelState.IsValid)
+            if (Input.Role == SD.Role_Company && Input.CompanyId == null)
             {
-                var user = CreateUser();
-
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
-                user.Name = Input.Name;
-                user.PhoneNumber = Input.PhoneNumber;
-                user.StreetAddress = Input.StreetAddress;
-                user.City = Input.City;
-                user.State = Input.State;
-                user.PinCode = Input.PinCode;
-                if(Input.Role == SD.Role_Company)
-                user.CompanyId = Input.CompanyId;
-
-                var result = await _userManager.CreateAsync(user, Input.Password);
-
-                if (result.Succeeded)
+                // Add error manually
+                ModelState.AddModelError("Input.CompanyId", "Please select your Company.");
+            }
+            else
+            {
+                ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+                if (ModelState.IsValid)
                 {
-                    _logger.LogInformation("User created a new account with password.");
+                    var user = CreateUser();
 
-                    if (!string.IsNullOrEmpty(Input.Role))
+                    await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                    await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                    user.Name = Input.Name;
+                    user.PhoneNumber = Input.PhoneNumber;
+                    user.StreetAddress = Input.StreetAddress;
+                    user.City = Input.City;
+                    user.State = Input.State;
+                    user.PinCode = Input.PinCode;
+                    if (Input.Role == SD.Role_Company)
+                        user.CompanyId = Input.CompanyId;
+
+                    var result = await _userManager.CreateAsync(user, Input.Password);
+
+                    if (result.Succeeded)
                     {
-                        await _userManager.AddToRoleAsync(user, Input.Role);
-                    }
-                    else
-                    {
-                        await _userManager.AddToRoleAsync(user, SD.Role_Customer);
-                    }
+                        _logger.LogInformation("User created a new account with password.");
+
+                        if (!string.IsNullOrEmpty(Input.Role))
+                        {
+                            await _userManager.AddToRoleAsync(user, Input.Role);
+                        }
+                        else
+                        {
+                            await _userManager.AddToRoleAsync(user, SD.Role_Customer);
+                        }
 
                         var userId = await _userManager.GetUserIdAsync(user);
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                        protocol: Request.Scheme);
+                        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                        var callbackUrl = Url.Page(
+                            "/Account/ConfirmEmail",
+                            pageHandler: null,
+                            values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
+                            protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
-                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                    {
-                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+                        if (_userManager.Options.SignIn.RequireConfirmedAccount)
+                        {
+                            return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl = returnUrl });
+                        }
+                        else
+                        {
+                            if (!(User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee)))
+                            {
+                                await _signInManager.SignInAsync(user, isPersistent: false);
+                            }
+                            else
+                            {
+                                TempData["success"] = "New User Created Successfully";
+                            }
+                            return LocalRedirect(returnUrl);
+                        }
                     }
-                    else
+                    foreach (var error in result.Errors)
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
+                        if (error.Code == "DuplicateUserName")
+                        {
+                            // Replace the default message with your own
+                            ModelState.AddModelError(string.Empty, $"Email '{Input.Email}' is already taken.");
+                        }
+                        else
+                        {
+                            // For all other errors (like weak password), keep the default
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
                     }
-                }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-
             // If we got this far, something failed, redisplay form
+            Input.RoleList = _RoleManager.Roles.Select(x => x.Name).Select(i => new SelectListItem
+            {
+                Text = i,
+                Value = i
+            }).ToList();
+            Input.CompanyList = _unitOfWork.Company.GetAll().Select(i => new SelectListItem
+            {
+                Text = i.Name,
+                Value = i.Id.ToString()
+            }).ToList();
+
             return Page();
         }
 

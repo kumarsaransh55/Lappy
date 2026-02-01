@@ -32,9 +32,21 @@
 		}).then(async response => {
             if(response.ok){
 				document.getElementById('cart-view-container').innerHTML = await response.text();
+                reloadCart();
             }else{
 				console.error('Error updating cart:', response.statusText);
             }
         });
 	}
+    function reloadCart(){
+        fetch('/Customer/Cart/ReloadCartIcon',{
+            method: 'GET',
+        }).then(async response =>{
+            if(response.ok){
+                document.getElementById('cart-container').innerHTML = await response.text();
+            }else{
+                console.error('Error updating cart:', response.statusText);
+            }
+        });
+    }
 </script>
