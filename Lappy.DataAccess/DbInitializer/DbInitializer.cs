@@ -3,6 +3,7 @@ using Lappy.Models;
 using Lappy.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,15 +17,18 @@ namespace Lappy.DataAccess.DbInitializer
         private readonly UserManager<IdentityUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ApplicationDbContext _dbContext;
+        private readonly IConfiguration _configuration;
 
         public DbInitializer(UserManager<IdentityUser> userManager,
                              RoleManager<IdentityRole> roleManager,
-                             ApplicationDbContext dbContext)
+                             ApplicationDbContext dbContext,
+                             IConfiguration configuration)
         {
 
             _userManager = userManager;
             _roleManager = roleManager;
             _dbContext = dbContext;
+            _configuration = configuration;
         }
 
         public void InitializeAsync()
@@ -48,17 +52,17 @@ namespace Lappy.DataAccess.DbInitializer
 
                 _userManager.CreateAsync(new ApplicationUser
                 {
-                    UserName = "admin@lappybag.com",
-                    Email = "admin@lappybag.com",
+                    UserName = _configuration["Admin:userId"],
+                    Email = _configuration["Admin:userId"],
                     Name = "Saransh Kumar",
                     PhoneNumber = "8700661336",
                     StreetAddress = "House- 34/3, Pearl Enclave, Patel Nagar",
                     State = "Delhi",
                     PinCode = "110034",
                     City = "New Delhi"
-                }, "admin@113").GetAwaiter().GetResult();
+                }, _configuration["Admin:pwd"]).GetAwaiter().GetResult();
 
-                ApplicationUser user = _dbContext.ApplicationUsers.FirstOrDefault(u => u.Email == "admin@lappybag.com");
+                ApplicationUser user = _dbContext.ApplicationUsers.FirstOrDefault(u => u.Email == _configuration["Admin:userId"]);
                 _userManager.AddToRoleAsync(user, SD.Role_Admin).GetAwaiter().GetResult();
             }
             return;

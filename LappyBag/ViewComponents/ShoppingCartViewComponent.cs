@@ -23,6 +23,7 @@ namespace LappyBag.ViewComponents
                 if (HttpContext.Session.GetInt32(SD.SessionCart) == null)
                 {
                     HttpContext.Session.SetInt32(SD.SessionCart, _unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == user).Count());
+                    HttpContext.Session.SetString(SD.SessionName, _unitOfWork.ApplicationUser.Get(u=>u.Id == user).Name);
                 }
                 return View(HttpContext.Session.GetInt32(SD.SessionCart));
             }

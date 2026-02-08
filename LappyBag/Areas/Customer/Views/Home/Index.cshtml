@@ -1,34 +1,79 @@
 ﻿@model IEnumerable<Product>
 
-<div class="row pb-3">
-	@foreach (var prod in Model)
-	{
-		<div class="col-lg-3 col-sm-6 mb-2">
-			<div class="card p-2 border-0 shadow border-top border-5 rounded product-card">
-				<a asp-action="Details" asp-route-id ="@prod.Id" class="text-decoration-none ">
-				<div class="ratio ratio-4x3">
-					<img src="@prod.ImageUrl" class="card-img-top rounded object-fit-cover" ></img>
-				</div>
-				<div class="card-body pb-0">
-					<p class="card-title h5 text-dark opacity-85 text-center"> @prod.Brand @prod.ModelName</p>
-					<p class="card-title text-dark "> @prod.CpuModel @prod.RamMemory RAM @prod.GraphicsCard</p>
-				</div>
-				</a>
-				<div class="card-footer text-center border-0">
-					<div class="mb-1">
-						<span class="h5 mb-0">₹ @prod.ListPrice</span>
-						<small class="text-muted">Incl. GST</small>
-					</div>
-					<div>
-						As low as <span class="h5 mb-0">₹ @prod.ListPrice100</span>
-						<small class="text-muted">Incl. GST</small>
-					</div>
+<!-- 1. Hero / Banner Section -->
+<!-- 1. Hero / Banner Section (Light Theme Optimized) -->
+<div class="p-4 mb-4 rounded-3 border shadow-sm"
+     style="background: linear-gradient(to right, rgba(255,255,255,0.95), rgba(255,255,255,0.4)), url('https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            border-color: #e9ecef !important;">
 
-				</div>
-				<div class="position-absolute top-0 start-0 m-2">
-					<span class="badge bg-success">In stock</span>
-				</div>
-			</div>
-		</div>
-	}
+    <div class="container-fluid py-2">
+        <!-- text-dark makes it readable on light theme -->
+        <h1 class="display-6 fw-bold text-uppercase text-dark mb-2">Enterprise IT Assets</h1>
+
+        <p class="col-md-8 fs-6 text-secondary mb-0">
+            Specialized procurement for high-performance computing.
+            <!-- Using text-primary (Blue) to make the B2B part stand out -->
+            <span class="text-primary fw-bold">B2B Tiered Pricing</span> enabled for corporate partners.
+        </p>
+    </div>
+</div>
+
+<!-- 2. Product Grid -->
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 pb-5">
+    @foreach (var prod in Model)
+    {
+        <div class="col">
+            <div class="card product-card border-0 shadow-sm rounded-3">
+
+                <!-- Badge Overlay -->
+                <div class="position-absolute top-0 start-0 m-2" style="z-index: 2;">
+                    <span class="badge bg-success shadow-sm">
+                        <i class="bi bi-check2-circle"></i> In Stock
+                    </span>
+                </div>
+
+                <!-- Product Image with Zoom wrapper -->
+                <a asp-action="Details" asp-route-id="@prod.Id" class="img-container ratio ratio-4x3">
+                    <img src="@prod.ImageUrl" class="card-img-top object-fit-cover" alt="@prod.ModelName">
+                </a>
+
+                <!-- Card Content -->
+                <div class="card-body p-3 pb-1">
+                    <a asp-action="Details" asp-route-id="@prod.Id" class="card-title-link">
+                        <h6 class="card-title text-primary fw-bold text-uppercase text-truncate mb-2">
+                            @prod.Brand @prod.ModelName
+                        </h6>
+                    </a>
+
+                    <!-- Technical Specifications -->
+                    <div class="spec-text mb-2">
+                        <div class="text-truncate"><i class="bi bi-cpu"></i> @prod.CpuModel</div>
+                        <div><i class="bi bi-memory"></i> @prod.RamMemory RAM</div>
+                        <div class="text-truncate"><i class="bi bi-gpu-card"></i> @prod.GraphicsCard</div>
+                    </div>
+
+                    <!-- Pricing Section -->
+                    <div class="pt-2 border-top">
+                        <div class="d-flex justify-content-center align-items-baseline">
+                            <span class="h5 text-white mb-0">₹@prod.ListPrice.ToString("N0")</span>
+                            <small class="text-muted" style="font-size: 0.7rem;">INCL. GST</small>
+                        </div>
+                        <div class="d-flex justify-content-center align-items-baseline mt-1">
+                            <small class="text-info fw-bold">Bulk Rate:</small>
+                            <span class="text-info fw-bold">₹@prod.ListPrice100.ToString("N0")</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Action -->
+                <div class="card-footer border-0 pb-3">
+                    <a asp-action="Details" asp-route-id="@prod.Id" class="btn btn-primary w-100 btn-sm shadow-sm">
+                        <i class="bi bi-eye"></i> View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
 </div>

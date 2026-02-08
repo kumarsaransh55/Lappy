@@ -8,6 +8,7 @@ using Lappy.Utility;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.CodeAnalysis.Options;
 using Lappy.DataAccess.DbInitializer;
+using System.Configuration;
 
 namespace LappyBag
 {
@@ -50,8 +51,13 @@ namespace LappyBag
             
             builder.Services.AddAuthentication().AddFacebook(option =>
             {
-                option.AppId = "937066642088381";
-                option.AppSecret = "499fac9f40e0cef6ff96048a7f792a21";
+                option.AppId = builder.Configuration["Facebook:KeyId"];
+                option.AppSecret = builder.Configuration["Facebook:KeySecret"];
+            });
+            builder.Services.AddAuthentication().AddGoogle(option =>
+            {
+                option.ClientId = builder.Configuration["Google:KeyId"];
+                option.ClientSecret = builder.Configuration["Google:KeySecret"];
             });
 
             var app = builder.Build();
