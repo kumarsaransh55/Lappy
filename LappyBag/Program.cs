@@ -1,13 +1,14 @@
+using Azure.Identity;
 using Lappy.DataAccess.Data;
+using Lappy.DataAccess.DbInitializer;
 using Lappy.DataAccess.Repository;
 using Lappy.DataAccess.Repository.IRepository;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 using Lappy.Models;
 using Lappy.Utility;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.CodeAnalysis.Options;
-using Lappy.DataAccess.DbInitializer;
+using Microsoft.EntityFrameworkCore;
 using System.Configuration;
 
 namespace LappyBag
@@ -60,6 +61,17 @@ namespace LappyBag
                 option.ClientSecret = builder.Configuration["Google:KeySecret"];
             });
 
+            // --- KEY VAULT INTEGRATION START ---
+            if (builder.Environment.IsProduction())
+            {
+                var keyVaultName = builder.Configuration["SecretVault"];
+                var keyVaultUri = new Uri($"https://{keyVaultName}.vault.azure.net/");
+
+                builder.Configuration.AddAzureKeyVault(keyVaultUri, new DefaultAzureCredential());
+            }
+            // --- KEY VAULT INTEGRATION END ---
+
+            // Continue with standard builder.Services...
             var app = builder.Build();
             seedDatabase();
             // Configure the HTTP request pipeline.
