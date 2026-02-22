@@ -21,10 +21,10 @@ namespace LappyBag
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            builder.Services.AddDbContext<ApplicationDbContext>(options=>
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddRazorPages();
-            builder.Services.AddIdentity<IdentityUser,IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+            builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
             builder.Services.Configure<IdentityOptions>(options =>
             {
                 options.Password.RequireDigit = false;
@@ -40,7 +40,7 @@ namespace LappyBag
                 options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
             });
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<IEmailSender,EmailSender>();
+            builder.Services.AddScoped<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IDbInitializer, DbInitializer>();
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
@@ -49,7 +49,7 @@ namespace LappyBag
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
-            
+
             builder.Services.AddAuthentication().AddFacebook(option =>
             {
                 option.AppId = builder.Configuration["Facebook:KeyId"];
@@ -97,13 +97,12 @@ namespace LappyBag
 
             void seedDatabase()
             {
-                using(var scope = app.Services.CreateScope())
+                using (var scope = app.Services.CreateScope())
                 {
                     var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
                     dbInitializer.InitializeAsync();
                 }
             }
-
         }
     }
 }

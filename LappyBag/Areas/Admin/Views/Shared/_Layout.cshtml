@@ -6,8 +6,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - LappyTech Procurement</title>
-
+    <title>@ViewData["Title"] LappyTech Procurement</title>
+    <link rel="icon" type="image/x-icon" href="~/laptop.png" />
     <!-- Professional Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,29 +20,10 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/LappyBag.styles.css" asp-append-version="true" />
 
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .navbar-brand {
-            letter-spacing: 1px;
-        }
-
-        .nav-link {
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-            .nav-link:hover {
-                color: #2aa198 !important;
-            }
-        /* Teal hover color */
-    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-primary border-bottom shadow-sm mb-3 py-2">
+        <nav class="navbar navbar-expand-lg navbar-toggleable navbar-dark bg-primary border-bottom shadow-sm mb-3 py-2">
             <div class="container">
                 <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
                     <i class="bi bi-laptop text-info me-2" style="font-size: 1.6rem;"></i>
@@ -54,8 +35,8 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav me-auto">
+                <div class="navbar-collapse collapse">
+                    <ul class="navbar-nav flex-grow-1">
                         <!-- 2. Home Link -->
                         <li class="nav-item">
                             <a class="nav-link" asp-area="Customer" asp-controller="Home" asp-action="Index">
@@ -77,37 +58,33 @@
                                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-gear me-1"></i> Management
                                 </a>
-                                <ul class="dropdown-menu shadow border-0 mt-2">
+                                <ul class="dropdown-menu dropdown-menu-dark shadow border-0 mt-2">
                                     <li><a class="dropdown-item" asp-area="Admin" asp-controller="Category" asp-action="Index">Category</a></li>
                                     <li><a class="dropdown-item" asp-area="Admin" asp-controller="Product" asp-action="Index">Product</a></li>
                                     <li><a class="dropdown-item" asp-area="Admin" asp-controller="Company" asp-action="Index">Company</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">Create User</a></li>
+                                    <li><a class="dropdown-item" asp-area="Admin" asp-controller="User" asp-action="Index">Manage User</a></li>
                                 </ul>
                             </li>
                         }
-                    </ul>
-
-                    <!-- 5. Right Aligned Items -->
-                    <div class="d-flex align-items-center">
-                        <ul class="navbar-nav">
-                            <li class="nav-item me-3">
-                                <a class="nav-link position-relative" asp-area="Customer" asp-controller="Cart" asp-action="index">
+                            <li class="nav-item ms-lg-auto">
+                                <a class="nav-link" asp-area="Customer" asp-controller="Cart" asp-action="index">
                                     <span id="cart-container">
                                         @await Component.InvokeAsync("ShoppingCart")
                                     </span>
                                 </a>
                             </li>
-                        </ul>
+
                         <partial name="_LoginPartial" />
-                    </div>
+                    </ul>
                 </div>
             </div>
         </nav>
     </header>
 
-    <div class="container mb-5">
-        <main role="main" class="pb-3">
+    <div class="container">
+        <main role="main">
             <partial name="/Areas/Admin/Views/Shared/_Notification.cshtml" />
             @RenderBody()
         </main>

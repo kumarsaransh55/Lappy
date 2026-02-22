@@ -14,6 +14,10 @@ html {
 body {
     background-color: #f8f9fa; /* Very Light Gray (Off-white) */
     color: #212529; /* Dark Gray Text */
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 /* 2. THE PRODUCT CARD (LIGHT THEME) */
@@ -28,7 +32,7 @@ body {
 }
 
     .product-card:hover {
-        transform: translateY(-8px);
+        transform: translateY(-4px);
         box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
         border-color: #375a7f !important; /* Blue border on hover */
     }
@@ -45,7 +49,7 @@ body {
 }
 
 .product-card:hover .card-img-top {
-    transform: scale(1.08);
+    transform: scale(1.04);
 }
 
 .spec-text {
@@ -89,8 +93,8 @@ input[type=number]::-webkit-outer-spin-button {
     box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #375a7f;
 }
 
-    .social-link:hover {
-        opacity: 1;
-        color: #0077b5 !important; /* The official LinkedIn Blue */
-        text-shadow: 0 0 10px rgba(0, 119, 181, 0.5); /* Soft glow */
-    }
+.social-link:hover {
+    opacity: 1;
+    color: #0077b5 !important; /* The official LinkedIn Blue */
+    text-shadow: 0 0 10px rgba(0, 119, 181, 0.5); /* Soft glow */
+}

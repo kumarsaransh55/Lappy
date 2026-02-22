@@ -3,6 +3,7 @@ using Lappy.Models;
 using Lappy.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Razorpay.Api;
 
@@ -15,10 +16,12 @@ namespace LappyBag.Areas.Customer.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
-        public CartController(IUnitOfWork unitOfWork, IConfiguration configuration)
+        private readonly IEmailSender _emailSender;
+        public CartController(IUnitOfWork unitOfWork, IConfiguration configuration, IEmailSender emailSender)
         {
             _unitOfWork = unitOfWork;
             _configuration = configuration;
+            _emailSender = emailSender;
         }
         // GET: CartController
         
@@ -178,10 +181,50 @@ namespace LappyBag.Areas.Customer.Controllers
             _unitOfWork.Save();
             return RedirectToAction(nameof(OrderConfirmation), new { id = cart.OrderHeader.Id });
         }
-        
-        public ActionResult OrderConfirmation(int id)
+
+        public async Task<IActionResult> OrderConfirmation(int id)
         {
+            // 1. Fetch the data ONCE using 'includeProperties' to get user info
+            var orderHeader = _unitOfWork.OrderHeader.Get(u => u.Id == id, includeProperties: "ApplicationUser");
+
+            if (orderHeader == null) return NotFound();
+
+            // 2. Clear the cart session
             HttpContext.Session.SetInt32(SD.SessionCart, 0);
+
+            // 3. Define professional content
+            var subject = $"Order Confirmed - LappyTech #{orderHeader.Id}";
+
+            // Use an Interpolated String ($"") to inject variables into the HTML
+            var emailMessage = $@"
+        <div style='font-family: ""Segoe UI"", Tahoma, Geneva, Verdana, sans-serif; padding: 20px; color: #333;'>
+            <div style='max-width: 600px; margin: auto; border: 1px solid #e1e1e1; border-radius: 10px; overflow: hidden;'>
+                <div style='background-color: #375a7f; color: white; padding: 20px; text-align: center;'>
+                    <h1 style='margin: 0;'>LappyTech Procurement</h1>
+                </div>
+                <div style='padding: 30px;'>
+                    <h2 style='color: #375a7f;'>Thank you for your order!</h2>
+                    <p>Hi <strong>{orderHeader.Name}</strong>,</p>
+                    <p>We are excited to let you know that your order has been placed successfully. Our technical team is now preparing your hardware for shipment.</p>
+                    
+                    <div style='background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;'>
+                        <p style='margin: 5px 0;'><strong>Order ID:</strong> #{orderHeader.Id}</p>
+                        <p style='margin: 5px 0;'><strong>Total Amount:</strong> {orderHeader.OrderTotal.ToString("c")}</p>
+                        <p style='margin: 5px 0;'><strong>Status:</strong> Processing</p>
+                    </div>
+
+                    <p>You will receive another update as soon as your tracking number is generated.</p>
+                    <p>Best Regards,<br/>The LappyTech Team</p>
+                </div>
+                <div style='background-color: #f4f4f4; color: #888; padding: 15px; text-align: center; font-size: 12px;'>
+                    This is a system-generated email. Please do not reply to this address.
+                </div>
+            </div>
+        </div>";
+
+            // 4. CRITICAL: Use 'await' so the server waits for the email to send!
+            await _emailSender.SendEmailAsync(orderHeader.ApplicationUser.Email, subject, emailMessage);
+
             return View(id);
         }
 

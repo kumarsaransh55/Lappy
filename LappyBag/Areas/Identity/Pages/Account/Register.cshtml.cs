@@ -150,6 +150,47 @@ namespace LappyBag.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 
+        private string getWelcomeTemplate(string name)
+        {
+            return $@"
+    <div style='font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 30px;'>
+        <div style='max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; shadow: 0 4px 10px rgba(0,0,0,0.1);'>
+            <!-- Header -->
+            <div style='background-color: #375a7f; padding: 20px; text-align: center;'>
+                <h1 style='color: #ffffff; margin: 0; font-size: 24px;'>LAPPY<span style='color: #0dcaf0;'>TECH</span></h1>
+            </div>
+            
+            <!-- Body -->
+            <div style='padding: 30px; color: #333333; line-height: 1.6;'>
+                <h2 style='color: #375a7f;'>Welcome to the Platform, {name}!</h2>
+                <p>Thank you for registering with <strong>LappyTech Procurement</strong>. Your account is now active and ready for use.</p>
+                
+                <p>As a registered member, you now have access to:</p>
+                <ul style='padding-left: 20px;'>
+                    <li>Real-time inventory of enterprise-grade hardware.</li>
+                    <li>Tiered pricing based on procurement volume.</li>
+                    <li>Order tracking and history dashboard.</li>
+                </ul>
+
+                <div style='text-align: center; margin: 30px 0;'>
+                    <a href='https://lappytech.azurewebsites.net/' 
+                       style='background-color: #0dcaf0; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;'>
+                       Explore Hardware Inventory
+                    </a>
+                </div>
+
+                <p>If you have any questions regarding B2B pricing or corporate credit lines, please contact our support team.</p>
+                
+                <p>Best Regards,<br/>The LappyTech Team</p>
+            </div>
+
+            <!-- Footer -->
+            <div style='background-color: #eeeeee; padding: 15px; text-align: center; font-size: 12px; color: #777777;'>
+                &copy; {DateTime.Now.Year} LappyTech IT Solutions. All rights reserved.
+            </div>
+        </div>
+    </div>";
+        }
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
@@ -200,8 +241,8 @@ namespace LappyBag.Areas.Identity.Pages.Account
                             values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                             protocol: Request.Scheme);
 
-                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                            $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                        //await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                        //   $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)
                         {
@@ -211,6 +252,12 @@ namespace LappyBag.Areas.Identity.Pages.Account
                         {
                             if (!(User.IsInRole(SD.Role_Admin) || User.IsInRole(SD.Role_Employee)))
                             {
+                                var subject = "Welcome to LappyTech - Enterprise IT Procurement";
+
+                                var welcomeMessage = $@"{getWelcomeTemplate(Input.Name)}";
+
+                                await _emailSender.SendEmailAsync(Input.Email, subject, welcomeMessage);
+
                                 await _signInManager.SignInAsync(user, isPersistent: false);
                             }
                             else

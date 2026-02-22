@@ -101,7 +101,6 @@ namespace LappyBag.Areas.Admin.Controllers
 
 
         [HttpPost]
-        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public IActionResult CancelOrder()
         {
             var orderHeader = _unitOfWork.OrderHeader.Get(u => u.Id == OrderVM.orderHeader.Id);
@@ -136,8 +135,6 @@ namespace LappyBag.Areas.Admin.Controllers
             return RedirectToAction("Details", "Order", new { orderId = OrderVM.orderHeader.Id });
         }
 
-        [HttpPost]
-        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         [HttpPost]
         public ActionResult DetailsPayNow()
         {
