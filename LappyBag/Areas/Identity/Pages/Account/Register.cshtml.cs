@@ -241,8 +241,53 @@ namespace LappyBag.Areas.Identity.Pages.Account
                             values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                             protocol: Request.Scheme);
 
-                        //await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        //   $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                        // 1. Prepare the name (assuming you have a 'Name' property in your Input model)
+                        string name = Input.Name;
+
+                        // 2. Create the HTML Body using a Verbatim Interpolated String
+                        string emailBody = $@"
+<div style='font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 30px;'>
+    <div style='max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1);'>
+        <!-- Header -->
+        <div style='background-color: #375a7f; padding: 20px; text-align: center;'>
+            <h1 style='color: #ffffff; margin: 0; font-size: 24px;'>LAPPY<span style='color: #0dcaf0;'>TECH</span></h1>
+        </div>
+        
+        <!-- Body -->
+        <div style='padding: 30px; color: #333333; line-height: 1.6;'>
+            <h2 style='color: #375a7f;'>Confirm Your Email, {name}!</h2>
+            <p>Thank you for registering with <strong>LappyTech Procurement</strong>. To finish setting up your account, please confirm your email address.</p>
+            
+            <p>As a registered member, you will have access to:</p>
+            <ul style='padding-left: 20px;'>
+                <li>Real-time inventory of enterprise-grade hardware.</li>
+                <li>Tiered pricing based on procurement volume.</li>
+                <li>Order tracking and history dashboard.</li>
+            </ul>
+
+            <!-- THE CONFIRMATION BUTTON -->
+            <div style='text-align: center; margin: 30px 0;'>
+                <a href='{HtmlEncoder.Default.Encode(callbackUrl)}' 
+                   style='background-color: #0dcaf0; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;'>
+                   Confirm My Account
+                </a>
+            </div>
+
+            <p>If the button above doesn't work, copy and paste this link into your browser:</p>
+            <p style='font-size: 12px; color: #777777; word-break: break-all;'>{callbackUrl}</p>
+            
+            <p>Best Regards,<br/>The LappyTech Team</p>
+        </div>
+
+        <!-- Footer -->
+        <div style='background-color: #eeeeee; padding: 15px; text-align: center; font-size: 12px; color: #777777;'>
+            &copy; {DateTime.Now.Year} LappyTech IT Solutions. All rights reserved.
+        </div>
+    </div>
+</div>";
+
+                        // 3. Send the email
+                        await _emailSender.SendEmailAsync(Input.Email, "Confirm your LappyTech Account", emailBody);
 
                         if (_userManager.Options.SignIn.RequireConfirmedAccount)
                         {

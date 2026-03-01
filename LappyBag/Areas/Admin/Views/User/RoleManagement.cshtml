@@ -1,0 +1,77 @@
+﻿@model RoleVM
+
+@{
+    ViewData["Title"] = "Manage User";
+}
+
+<div class="card shadow border-0 mt-4">
+    <div class="card-header bg-primary bg-gradient ml-4 p-4">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h2 class="py-2 text-white">Manage User</h2>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-4">
+        <div class="row pt-2">
+            <div class="col-md-12">
+                <form method="post" class="row">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="form-floating mb-3 col-md-12">
+                        <input readonly asp-for="Name" class="form-control" autocomplete="name" aria-required="true" />
+                        <label asp-for="Name">Name</label>
+                    </div>
+                    <div class="form-floating mb-3 col-md-6">
+                        
+                        <select asp-for="Role" asp-items="Model.RoleList" class="form-select pt-2">
+                            <option disabled selected>
+                                Select a role
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-floating mb-3 col-md-6">
+                        <select asp-for="CompanyId" asp-items="@Model.CompanyList" class="form-select pt-2">
+                            <option disabled selected>
+                                Select a Company
+                            </option>
+                        </select>
+                        <span asp-validation-for="CompanyId" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-12 text-center">
+                        <button id="updateSubmit" type="submit" class="w-100 btn btn-primary ">Update Role</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function(){
+            if($('#Role option:selected').text() != "Company"){
+                $('#CompanyId').hide();
+            }
+
+            $('#Role').change(function(){
+                var selection = $('#Role option:selected').text();
+                if(selection == "Company"){
+                    $('#CompanyId').show();
+                }else{
+                    $('#CompanyId').hide();
+                    $('#CompanyId').prop('selectedIndex', 0);
+                     $('span[data-valmsg-for="CompanyId"]').text('');
+                }
+            });
+
+            $('#CompanyId').change(function(){
+                var companyValue = $(this).val();
+                var selection = $('#Role option:selected').text();
+                if(selection == "Company" && companyValue != ""){
+                    $('span[data-valmsg-for="CompanyId"]').text('');
+                }
+            })
+        })
+    </script>
+}

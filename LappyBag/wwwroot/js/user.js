@@ -21,19 +21,19 @@ function loadDataTable() {
                         const todayDate = new Date().getTime();
                         const lockoutDate = new Date(data.lockoutEnd).getTime();
                            
-                        let renderHtml = `<div class="d-flex gap-2">
-                            <a href = "user/details?userId=${data.id}" class="btn btn-primary" > <i class="bi bi-pencil-square"></i>Edit</a>`;
+                        let renderHtml = `<div class="d-flex justify-content-center gap-2">
+                            <a href = "user/rolemanagement/${data.id}" class="btn btn-primary text-nowrap" > <i class="bi bi-pencil-square"></i>Edit</a>`;
                         if (lockoutDate > todayDate) {
-                            renderHtml += `<a onclick=LockUnlock('${data.id}') class="btn btn-danger" style = "cursor:pointer;" >
+                            renderHtml += `<a onclick=LockUnlock('${data.id}') class="btn btn-danger text-nowrap" >
                                 <i class="bi bi-lock-fill"></i>Unlock</a >`;
                         } else {
-                            renderHtml += `<a onclick=LockUnlock('${data.id}') class="btn btn-success" style="cursor:pointer;">
+                            renderHtml += `<a onclick=LockUnlock('${data.id}') class="btn btn-success text-nowrap" >
                             <i class="bi bi-unlock-fill"></i>Lock</a>`;
                         }
                         renderHtml += `</div>`;
                         return renderHtml;
                     },
-                    "width": "20%"
+                    "width": "23%"
                 }
             ]
     });
@@ -41,9 +41,17 @@ function loadDataTable() {
 function LockUnlock(id) {
     $.ajax({
         type: "POST",
-        url: "Admin/user/LockUnlock?id=" + id,
+        url: "/Admin/user/LockUnlock/" + id,
         success: function (data) {
-
+            if (data.success) {
+                toastr.success(data.message)
+                dataTable.ajax.reload();
+            } else {
+                toastr.error(data.message)
+            }
+        },
+        error: function (status) {
+            toastr.error(status);
         }
     })
 }
