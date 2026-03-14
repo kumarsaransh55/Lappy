@@ -65,27 +65,28 @@ namespace LappyBag.Areas.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> RoleManagement(RoleVM roleVM)
         {
-            var user = roleVM.User;
+            var user =  _unitOfWork.ApplicationUser.Get(u => u.Id == roleVM.User.Id);
             if (user == null)
             {
                 return NotFound();
             }
 
-            // 2. Get the current role (Identity way)
             var roles = await _userManager.GetRolesAsync(user);
             var oldRole = roles.FirstOrDefault();
-
-            if (oldRole != roleVM.Role)
+            
+            if (oldRole != roleVM.Role || (oldRole==roleVM.Role && oldRole==SD.Role_Company))
             {
-                // 3. Perform Role Changes
-                if (!string.IsNullOrEmpty(oldRole))
-                {
-                    await _userManager.RemoveFromRoleAsync(user, oldRole);
-                }
-                await _userManager.AddToRoleAsync(user, roleVM.Role);
 
-                // 4. Update Properties on the SAME tracked object
-                if (oldRole == SD.Role_Company)
+                if (!(oldRole == roleVM.Role && oldRole == SD.Role_Company))
+                {
+                    if (!string.IsNullOrEmpty(oldRole))
+                    {
+                        await _userManager.RemoveFromRoleAsync(user, oldRole);
+                    }
+                    await _userManager.AddToRoleAsync(user, roleVM.Role);
+                }
+
+                if (oldRole == SD.Role_Company && roleVM.Role != SD.Role_Company)
                 {
                     user.CompanyId = null;
                 }
@@ -93,10 +94,7 @@ namespace LappyBag.Areas.Admin.Controllers
                 {
                     user.CompanyId = roleVM.User.CompanyId;
                 }
-
-                // 5. Final Save
-                // Because 'user' is already being tracked by the context 
-                // through the UserManager, we just need to save.
+                _unitOfWork.ApplicationUser.Update(user);
                 _unitOfWork.Save();
             }
 
@@ -132,7 +130,7 @@ namespace LappyBag.Areas.Admin.Controllers
             {
                 if (userinfo.LockoutEnd != null && userinfo.LockoutEnd > DateTime.Now)
                 {
-                    userinfo.LockoutEnd = DateTime.Now;
+                    userinfo.LockoutEnd = DateTimeOffset.UtcNow.AddMinutes(-1);
                 }
                 else
                 {
