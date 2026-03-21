@@ -42,6 +42,11 @@ namespace LappyBag.Areas.Customer.Controllers
         [Authorize]
         public IActionResult Details(ShoppingCart cart)
         {
+            if (cart.Count < 1)
+            {
+                TempData["errormsg"] = "Quantity must be at least 1";
+                return RedirectToAction(nameof(Details));
+            }
             cart.Id = 0;
             var claimsIdentity = (System.Security.Claims.ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier).Value;

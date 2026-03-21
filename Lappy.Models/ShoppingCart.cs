@@ -18,6 +18,7 @@ namespace Lappy.Models
         public int ProductId { get; set; }
 
         public Product Product { get; set; }
+        [Required]
         [Range(1,1000, ErrorMessage = "Please select a quantity between 1 and 1000")]
         public int Count { get; set; }
         

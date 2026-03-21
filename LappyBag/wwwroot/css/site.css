@@ -120,3 +120,22 @@ table.dataTable {
     padding: .5rem 1rem;
     vertical-align: middle;
 }
+
+/* Keeps the carousel at a consistent height */
+.carousel-fixed-height {
+    height: 450px; /* Adjust this height as you like */
+    background-color: #fff; /* Matches white background of Amazon images */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+    /* Forces images to fit nicely inside the fixed height */
+    .carousel-fixed-height img {
+        max-height: 100%;
+        width: auto;
+        object-fit: contain; /* This prevents the image from stretching or jumping */
+        margin: 0 auto;
+    }

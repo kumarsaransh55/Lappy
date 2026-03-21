@@ -22,7 +22,10 @@
                 <p class="text-muted">
                     We have sent a confirmation email to your registered email address.
                     <br />
-                    Your package will be shipped within 2 days.
+                    @if (!User.IsInRole(SD.Role_Company))
+                    {
+                        @:Your package will be shipped within 7 days.
+                    }
                 </p>
             </div>
         </div>

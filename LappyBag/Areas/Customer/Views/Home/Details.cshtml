@@ -27,7 +27,9 @@
                     @for (int i = 0; i < Model.Product.ProductImages.Count; i++)
                     {
                         <div class="carousel-item @(i == 0 ? "active" : "")">
-                            <img class="d-block w-100" src="@Model.Product.ProductImages.ToList()[i].ImageUrl" alt="Product Image">
+                            <div class="carousel-fixed-height">
+                                <img src="@Model.Product.ProductImages.ToList()[i].ImageUrl" alt="Product Image">
+                            </div>
                         </div>
                     }
                 </div>
@@ -53,30 +55,35 @@
         }
 
 
-        <div class="d-flex justify-content-center mt-3">
-            <form method="post" class="" style="max-width: 300px; width: 100%;" >
+        <div class="d-flex justify-content-center mt-3 text-center">
+            <form method="post" style="max-width: 300px; width: 100%;">
                 <input hidden asp-for="ProductId" />
-                
-                <div class="input-group justify-content-center mb-3 shadow-sm">
-                    <!-- MINUS BUTTON -->
-                    <button type="button" class="btn btn-primary" onclick="updateCount(-1)">
-                        <i class="bi bi-dash-lg"></i>
-                    </button>
 
-                    <!-- THE INPUT (Note the ID 'countInput') -->
-                    <input asp-for="Count"
-                           id="countInput"
-                           type="number"
-                           value="1" min="1" max="1000"
-                           class="form-control text-center btn-outline-primary"
-                           style="max-width: 80px;" />
+                <!-- WRAPPER TO CENTER THE COMPACT GROUP -->
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="input-group shadow-sm w-auto">
+                        <!-- MINUS BUTTON -->
+                        <button type="button" class="btn btn-primary" onclick="updateCount(-1)">
+                            <i class="bi bi-dash-lg"></i>
+                        </button>
 
-                    <!-- PLUS BUTTON -->
-                    <button type="button" class="btn btn-primary " onclick="updateCount(1)">
-                        <i class="bi bi-plus-lg"></i>
-                    </button>
+                        <!-- INPUT (Removed extra classes, fixed width) -->
+                        <input asp-for="Count"
+                               id="countInput"
+                               type="number"
+                               value="1" min="1" max="1000"
+                               class="form-control text-center border-primary"
+                               style="width: 70px;"
+                               />
+
+                        <!-- PLUS BUTTON -->
+                        <button type="button" class="btn btn-primary" onclick="updateCount(1)">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary w-75" name="addtoCart">Add to Cart</button>
+                <span asp-validation-for="Count" class="text-danger"></span>
+                <button type="submit" onclick="checkCount()" class="btn btn-primary w-100" name="addtoCart">Add to Cart</button>
             </form>
         </div>
     </div>

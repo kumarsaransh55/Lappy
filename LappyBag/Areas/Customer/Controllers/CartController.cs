@@ -262,6 +262,7 @@ namespace LappyBag.Areas.Customer.Controllers
             orderHeader.PaymentStatus = SD.PaymentStatusApproved;
             orderHeader.TransactionId = payment_id;
             _unitOfWork.OrderHeader.Update(orderHeader);
+            _unitOfWork.Save();
             _unitOfWork.ShoppingCart.RemoveRange(_unitOfWork.ShoppingCart.GetAll(u => u.ApplicationUserId == orderHeader.ApplicationUserId));
             _unitOfWork.Save();
 

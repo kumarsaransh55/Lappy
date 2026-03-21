@@ -136,10 +136,10 @@ namespace LappyBag.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public ActionResult DetailsPayNow()
+        public ActionResult DetailsPayNow(int id)
         {
             RazorpayClient client = new RazorpayClient(_configuration["Razorpay:KeyId"], _configuration["Razorpay:KeySecret"]);
-            var orderHeaderfromDB = _unitOfWork.OrderHeader.Get(u => u.ApplicationUserId == OrderVM.orderHeader.ApplicationUserId);
+            var orderHeaderfromDB = _unitOfWork.OrderHeader.Get(u => u.Id == id);
             Razorpay.Api.Order order = client.Order.Create(new Dictionary<string, object>
                 {
                     {"amount", OrderVM.orderHeader.OrderTotal}, // amount in the smallest currency unit
@@ -182,7 +182,7 @@ namespace LappyBag.Areas.Admin.Controllers
             switch (status)
             {
                 case "pending":
-                    orderHeaders = orderHeaders.Where(u => u.PaymentStatus == SD.PaymentStatusDelayedPayment);
+                    orderHeaders = orderHeaders.Where(u => u.PaymentStatus == SD.PaymentStatusDelayedPayment || u.PaymentStatus == SD.PaymentStatusPending);
                     break;
                 case "inprocess":
                     orderHeaders = orderHeaders.Where(u => u.OrderStatus == SD.StatusInProcess);
